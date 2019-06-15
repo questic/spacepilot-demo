@@ -298,11 +298,20 @@ int main (int argc, char *argv[])
         {
           if (evt.type == DIET_AXISMOTION && evt.flags & DIEF_AXISREL)
             {
+		while(spnav_wait_event(&spev)) {
+		if(spev.type == SPNAV_EVENT_MOTION) {
+			Rotate(evt.axisrel *2, spev.motion.rx);
+			Rotate(evt.axisrel *2, spev.motion.ry);
+			Rotate(evt.axisrel *2, spev.motion.rz);
+		} else {	/* SPNAV_EVENT_BUTTON */
+			printf("got button %s event b(%d)\n", spev.button.press ? "press" : "release", spev.button.bnum);
+		}
               if (evt.axis == DIAI_X)
                 Rotate (evt.axisrel * 2, spev.motion.rx);
               else if (evt.axis == DIAI_Y)
                 Rotate (-evt.axisrel * 2, spev.motion.ry);
             }
+}
           else if (evt.type == DIET_KEYPRESS)
             {
               switch (evt.key_symbol)
