@@ -300,17 +300,15 @@ int main (int argc, char *argv[])
             {
 		while(spnav_wait_event(&spev)) {
 		if(spev.type == SPNAV_EVENT_MOTION) {
-			Rotate(evt.axisrel *2, spev.motion.rx);
-			Rotate(evt.axisrel *2, spev.motion.ry);
-			Rotate(evt.axisrel *2, spev.motion.rz);
+			Rotate(spev.motion.rx, 'x');
+			Rotate(spev.motion.ry, 'y');
+			Rotate(spev.motion.rz, 'z');
 		} else {	/* SPNAV_EVENT_BUTTON */
 			printf("got button %s event b(%d)\n", spev.button.press ? "press" : "release", spev.button.bnum);
 		}
-              if (evt.axis == DIAI_X)
-                Rotate (evt.axisrel * 2, spev.motion.rx);
-              else if (evt.axis == DIAI_Y)
-                Rotate (-evt.axisrel * 2, spev.motion.ry);
-            }
+              
+            
+}
 }
           else if (evt.type == DIET_KEYPRESS)
             {
