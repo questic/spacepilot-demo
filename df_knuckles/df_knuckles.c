@@ -295,7 +295,12 @@ int main (int argc, char *argv[])
 	
       DFBInputEvent evt;
 	
-	while(spnav_wait_event(&spev)) {
+
+      while (event_buffer->GetEvent (event_buffer, DFB_EVENT(&evt)) == DFB_OK)
+        {
+          if (evt.type == DIET_AXISMOTION && evt.flags & DIEF_AXISREL)
+            {
+		while(spnav_wait_event(&spev)) {
 		if(spev.type == SPNAV_EVENT_MOTION) {
 			Rotate(spev.motion.rx, 'x');
 			Rotate(spev.motion.ry, 'y');
@@ -307,10 +312,6 @@ int main (int argc, char *argv[])
               
             spnav_close();
 }
-      while (event_buffer->GetEvent (event_buffer, DFB_EVENT(&evt)) == DFB_OK)
-        {
-          if (evt.type == DIET_AXISMOTION && evt.flags & DIEF_AXISREL)
-            {
 	
 }
           else if (evt.type == DIET_KEYPRESS)
