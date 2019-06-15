@@ -298,34 +298,43 @@ int main (int argc, char *argv[])
 
       while (event_buffer->GetEvent (event_buffer, DFB_EVENT(&evt)) == DFB_OK)
         {
-          if (evt.type == DIET_AXISMOTION && evt.flags & DIEF_AXISREL)
-            {
-		while(spnav_wait_event(&spev)) {
-		if(spev.type == SPNAV_EVENT_MOTION) {
-			Rotate(spev.motion.x, 'x');
-			Rotate(spev.motion.y, 'y');
-			Rotate(spev.motion.z, 'z');
-			printf("got motion event: t(%d, %d, %d) ", spev.motion.rx, spev.motion.ry, spev.motion.rz);
+	if(spev.type == SPNAV_EVENT_MOTION) {
+			printf("got motion event: t(%d, %d, %d) ", spev.motion.x, spev.motion.y, spev.motion.z);
+			Rotate(spev.motion.rx, 'x');
+			Rotate(spev.motion.ry, 'y');
+			Rotate(spev.motion.rz, 'z');
 		} else {	/* SPNAV_EVENT_BUTTON */
 			printf("got button %s event b(%d)\n", spev.button.press ? "press" : "release", spev.button.bnum);
 		}
-              
-            spnav_close();
-}
-	
-}
+          if (evt.type == DIET_AXISMOTION && evt.flags & DIEF_AXISREL)
+	 {
+              if (evt.axis == DIAI_X)
+                Rotate (evt.axisrel * 2, 'y');
+              else if (evt.axis == DIAI_Y)
+                Rotate (-evt.axisrel * 2, 'x');
+            }
+		
+	 
+
           else if (evt.type == DIET_KEYPRESS)
             {
               switch (evt.key_symbol)
                 {
+		case DIKS_CURSOR_LEFT:
+			Rotate(50, 'x');
+		case DIKS_CURSOR_RIGHT:
+			Rotate(50, 'x');
+		case DIKS_CURSOR_UP:
+			Rotate(50, 'y');
+		case DIKS_CURSOR_DOWN:
+			Rotate(50, 'y');
                 case DIKS_OK:
                 case DIKS_SPACE:
                   if (PrimitiveType == FLAT_SHADED)
                     PrimitiveType = WIRE_FRAME;
-                  else
-                    PrimitiveType = FLAT_SHADED;
+                  
                   break;
-
+		
                 case DIKS_ESCAPE:
                 case DIKS_POWER:
                   quit = True;
