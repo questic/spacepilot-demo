@@ -302,9 +302,9 @@ int main (int argc, char *argv[])
             {
 		while(spnav_wait_event(&spev)) {
 		if(spev.type == SPNAV_EVENT_MOTION) {
-			Rotate(spev.motion.rx, 'x');
-			Rotate(spev.motion.ry, 'y');
-			Rotate(spev.motion.rz, 'z');
+			Rotate(spev.motion.x, 'x');
+			Rotate(spev.motion.y, 'y');
+			Rotate(spev.motion.z, 'z');
 			printf("got motion event: t(%d, %d, %d) ", spev.motion.rx, spev.motion.ry, spev.motion.rz);
 		} else {	/* SPNAV_EVENT_BUTTON */
 			printf("got button %s event b(%d)\n", spev.button.press ? "press" : "release", spev.button.bnum);
