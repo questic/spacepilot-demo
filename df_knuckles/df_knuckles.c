@@ -271,6 +271,7 @@ static void ClosedownDirectFB (void)
 
 int main (int argc, char *argv[])
 {
+	printf("hello");
   int quit = False;
   int dxL, dyL;
 	
