@@ -300,12 +300,12 @@ int main (int argc, char *argv[])
 			Rotate(spev.motion.rx, 'x');
 			Rotate(spev.motion.ry, 'y');
 			Rotate(spev.motion.rz, 'z');
-			printf("got motion event: t(%d, %d, %d) ", spev.motion.x, spev.motion.y, spev.motion.z);
+			printf("got motion event: t(%d, %d, %d) ", spev.motion.rx, spev.motion.ry, spev.motion.rz);
 		} else {	/* SPNAV_EVENT_BUTTON */
 			printf("got button %s event b(%d)\n", spev.button.press ? "press" : "release", spev.button.bnum);
 		}
               
-            
+            spnav_close();
 }
       while (event_buffer->GetEvent (event_buffer, DFB_EVENT(&evt)) == DFB_OK)
         {
