@@ -44,7 +44,7 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_df_knuckles_OBJECTS = df_knuckles.$(OBJEXT) matrix.$(OBJEXT)
+am_df_knuckles_OBJECTS = df_knuckles.$(OBJEXT) matrix.$(OBJEXT) vmath.$(OBJEXT)
 df_knuckles_OBJECTS = $(am_df_knuckles_OBJECTS)
 am__DEPENDENCIES_1 =
 df_knuckles_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -68,7 +68,7 @@ AUTOMAKE = ${SHELL} /home/questic/DirectFB-examples-1.2.0/missing --run automake
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -Wall -O3 -pipe  -Werror-implicit-function-declaration
+CFLAGS = -Wall -O3 -pipe  -Werror-implicit-function-declaration -pedantic -Wall -g -I../.. -I/usr/local/include
 CPP = gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo
@@ -88,7 +88,7 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LDFLAGS = 
+LDFLAGS = -L../.. -L/usr/local/lib -lGL -lGLU -lm 
 LIBOBJS = 
 LIBS = 
 LTLIBOBJS = 
@@ -158,8 +158,8 @@ target_alias =
 top_builddir = ../..
 top_srcdir = ../..
 AM_CFLAGS = -D_REENTRANT -I/usr/local/include/directfb
-LIBADDS = -L/usr/local/lib -ldirectfb -lpthread -lfusion -ldirect -lpthread
-df_knuckles_SOURCES = df_knuckles.c matrix.c matrix.h skull.h
+LIBADDS = -L/usr/local/lib -ldirectfb -lpthread -lfusion -ldirect -lpthread -lGL -lGLU -lm -lspnav
+df_knuckles_SOURCES = df_knuckles.c matrix.c matrix.h skull.h vmath.c
 df_knuckles_LDADD = $(LIBADDS) -lm
 all: all-am
 
@@ -229,6 +229,7 @@ distclean-compile:
 
 include ./$(DEPDIR)/df_knuckles.Po
 include ./$(DEPDIR)/matrix.Po
+
 
 .c.o:
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -1,22 +1,25 @@
-/*
-   Ported to DirectFB by Denis Oliver Kropp <dok@convergence.de>
-
-   Written by Mark Vojkovich <markv@valinux.com>
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glx.h>
 
 #include <directfb.h>
 
 #include "matrix.h"
 #include "skull.h"
+#include "spnav.h"
+#include "spnav.c"
+#include "spnav_config.h"
+#include "spnav_magellan.h"
+#include "spnav_magellan.c"
+#include "vmath.h"
 
 
 #undef  CLAMP
 #define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
-
+#define SQ(x)	((x) * (x))
 
 IDirectFB            *dfb;
 IDirectFBSurface     *primary;
@@ -34,6 +37,10 @@ int Width, Height;
 Vertex Light1 = {0.0,  0.0, 1.0};
 Vertex Light2 = {0.2, -0.2, 0.4};
 
+vec3_t pos = {0, 0, -6};
+quat_t rot = {0, 0, 0, 1};
+int redisplay;
+spnav_event spev;
 
 static Tri3D Triangles[SKULL_TRIANGLES];
 static Vertex TransformedVerticies[SKULL_VERTICIES];
@@ -209,6 +216,100 @@ static void DrawIt (void)
     }
 }
 
+void redraw(void)
+{
+	mat4_t xform;
+
+	quat_to_mat(xform, rot);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glTranslatef(pos.x, pos.y, pos.z);
+	glMultTransposeMatrixf((float*)xform);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);	
+
+	glLineWidth(4); 
+    	glColor3f(0.0f, 2.0f, 0.0f); 
+    	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE);
+    	DrawIt();
+
+    	glColor3f(0.0f, 2.0f, 0.0f);
+    	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE); 
+    	DrawIt();
+	
+ 
+    	glRotated(90, 0, 1, 0);
+ 
+    	glColor3f(0.0f, 2.0f, 0.0f);
+    	glPushMatrix();
+    	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE); 
+    	DrawIt();
+ 
+    	glColor3f(0.0f, 2.0f, 0.0f);
+    	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE); 
+    	DrawIt();
+ 
+    	glRotated(-90, 1, 0, 0);
+ 
+    	glColor3f(0.0f, 2.0f, 0.0f);
+    	glPushMatrix();
+    	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE); 
+    	DrawIt();
+ 
+    	glColor3f(0.0f, 2.0f, 0.0f);
+    	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE);
+    	DrawIt();
+
+	glRotated(-180, 1, 0, 0);
+		
+	glColor3f(0.0f, 2.0f, 0.0f);
+    	glPushMatrix();
+	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE); 
+    	DrawIt();
+ 
+    	glColor3f(0.0f, 2.0f, 0.0f);
+    	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE);
+    	DrawIt();
+	
+	glRotated(-270, 1, 0, 0);
+		
+	glColor3f(0.0f, 2.0f, 0.0f);
+    	glPushMatrix();
+	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE); 
+    	DrawIt();
+ 
+    	glColor3f(0.0f, 2.0f, 0.0f);
+    	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE);
+    	DrawIt();
+
+	glRotated(360, 1, 0, 1);
+		
+	glColor3f(0.0f, 2.0f, 0.0f);
+    	glPushMatrix();
+	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE); 
+    	DrawIt();
+ 
+    	glColor3f(0.0f, 2.0f, 0.0f);
+    	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE);
+    	DrawIt();
+	
+	glRotated(180, 1, 0, 1);
+ 
+    	glColor3f(0.0f, 2.0f, 0.0f);
+    	glPushMatrix();
+    	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE); 
+    	DrawIt();
+ 
+    	glColor3f(0.0f, 2.0f, 0.0f);
+    	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE); 
+    	DrawIt();
+
+	//glXSwapBuffers(dpy, win);
+}
+
 static int SetupDirectFB (int argc, char *argv[])
 {
   DFBResult ret;
@@ -250,6 +351,10 @@ static int SetupDirectFB (int argc, char *argv[])
       dfb->Release (dfb);
       return -7;
     }
+if(spnav_open()==-1) {
+	  	DirectFBError ("failed to connect to the space navigator daemon", ret);
+		return 1;
+	}
 
   primary->GetSize (primary, &Width, &Height);
 
@@ -267,7 +372,7 @@ int main (int argc, char *argv[])
 {
   int quit = False;
   int dxL, dyL;
-
+	
   if(SetupDirectFB (argc, argv))
     return -1;
 
@@ -285,6 +390,31 @@ int main (int argc, char *argv[])
 
   while(!quit)
     {
+	if(spev.type == SPNAV_EVENT_MOTION) {
+				/* apply axis/angle rotation to the quaternion */
+				if(spev.motion.rx || spev.motion.ry || spev.motion.rz) {
+					float axis_len = sqrt(SQ(spev.motion.rx) + SQ(spev.motion.ry) + SQ(spev.motion.rz));
+					rot = quat_rotate(rot, axis_len * 0.001, -spev.motion.rx / axis_len,
+							-spev.motion.ry / axis_len, spev.motion.rz / axis_len);
+				}
+
+				/* add translation */
+				pos.x += spev.motion.x * 0.001;
+				pos.y += spev.motion.y * 0.001;
+				pos.z -= spev.motion.z * 0.001;
+
+				redisplay = 1;
+			} else {
+				/* on button press, reset the cube */
+				if(spev.button.press) {
+					pos = v3_cons(0, 0, -6);
+					rot = quat_cons(1, 0, 0, 0);
+
+					redisplay = 1;
+				}
+			}
+			/* finally remove any other queued motion events */
+			spnav_remove_events(SPNAV_EVENT_MOTION);
       DFBInputEvent evt;
 
       while (event_buffer->GetEvent (event_buffer, DFB_EVENT(&evt)) == DFB_OK)
