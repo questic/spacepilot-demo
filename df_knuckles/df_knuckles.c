@@ -293,22 +293,24 @@ int main (int argc, char *argv[])
     {
 	
       DFBInputEvent evt;
-
-      while (event_buffer->GetEvent (event_buffer, DFB_EVENT(&evt)) == DFB_OK)
-        {
-          if (evt.type == DIET_AXISMOTION && evt.flags & DIEF_AXISREL)
-            {
-		while(spnav_wait_event(&spev)) {
+	
+	while(spnav_wait_event(&spev)) {
 		if(spev.type == SPNAV_EVENT_MOTION) {
 			Rotate(spev.motion.rx, 'x');
 			Rotate(spev.motion.ry, 'y');
 			Rotate(spev.motion.rz, 'z');
+			DirectFBError("got motion event: t(%d, %d, %d) ", spev.motion.x, spev.motion.y, spev.motion.z);
 		} else {	/* SPNAV_EVENT_BUTTON */
 			printf("got button %s event b(%d)\n", spev.button.press ? "press" : "release", spev.button.bnum);
 		}
               
             
 }
+      while (event_buffer->GetEvent (event_buffer, DFB_EVENT(&evt)) == DFB_OK)
+        {
+          if (evt.type == DIET_AXISMOTION && evt.flags & DIEF_AXISREL)
+            {
+	
 }
           else if (evt.type == DIET_KEYPRESS)
             {
