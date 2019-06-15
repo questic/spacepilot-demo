@@ -271,6 +271,7 @@ static void ClosedownDirectFB (void)
 
 int main (int argc, char *argv[])
 {
+	printf("hello");
   int quit = False;
   int dxL, dyL;
 	
@@ -293,6 +294,7 @@ int main (int argc, char *argv[])
     {
 	
       DFBInputEvent evt;
+	
 
       while (event_buffer->GetEvent (event_buffer, DFB_EVENT(&evt)) == DFB_OK)
         {
@@ -300,17 +302,17 @@ int main (int argc, char *argv[])
             {
 		while(spnav_wait_event(&spev)) {
 		if(spev.type == SPNAV_EVENT_MOTION) {
-			Rotate(evt.axisrel *2, spev.motion.rx);
-			Rotate(evt.axisrel *2, spev.motion.ry);
-			Rotate(evt.axisrel *2, spev.motion.rz);
+			Rotate(spev.motion.x, 'x');
+			Rotate(spev.motion.y, 'y');
+			Rotate(spev.motion.z, 'z');
+			printf("got motion event: t(%d, %d, %d) ", spev.motion.rx, spev.motion.ry, spev.motion.rz);
 		} else {	/* SPNAV_EVENT_BUTTON */
 			printf("got button %s event b(%d)\n", spev.button.press ? "press" : "release", spev.button.bnum);
 		}
-              if (evt.axis == DIAI_X)
-                Rotate (evt.axisrel * 2, spev.motion.rx);
-              else if (evt.axis == DIAI_Y)
-                Rotate (-evt.axisrel * 2, spev.motion.ry);
-            }
+              
+            spnav_close();
+}
+	
 }
           else if (evt.type == DIET_KEYPRESS)
             {
