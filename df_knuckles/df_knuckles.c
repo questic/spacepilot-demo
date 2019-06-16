@@ -271,7 +271,7 @@ static void ClosedownDirectFB (void)
 
 int main (int argc, char *argv[])
 {
-	printf("hello");
+	
   int quit = False;
   int dxL, dyL;
 	
@@ -289,33 +289,29 @@ int main (int argc, char *argv[])
 
   dxL = 11;
   dyL = 7;
-
+printf("%s\n","hello");
   while(!quit)
     {
-	
       DFBInputEvent evt;
-	
 
-      while (event_buffer->GetEvent (event_buffer, DFB_EVENT(&evt)) == DFB_OK)
+      while (spnav_wait_event(&spev) && event_buffer->GetEvent (event_buffer, DFB_EVENT(&evt)) == DFB_OK)
         {
 	if(spev.type == SPNAV_EVENT_MOTION) {
-			printf("got motion event: t(%d, %d, %d) ", spev.motion.x, spev.motion.y, spev.motion.z);
-			Rotate(spev.motion.rx, 'x');
-			Rotate(spev.motion.ry, 'y');
-			Rotate(spev.motion.rz, 'z');
-		} else {	/* SPNAV_EVENT_BUTTON */
-			printf("got button %s event b(%d)\n", spev.button.press ? "press" : "release", spev.button.bnum);
+			printf("got motion event: t(%d, %d, %d)\n", spev.motion.x, spev.motion.y, spev.motion.z);
+			Rotate(spev.motion.x, 'x');
+			Rotate(spev.motion.y, 'y');
+			Rotate(spev.motion.z, 'z');
+		} else {	
+			//printf("got button %s event b(%d)\n", spev.button.press ? "press" : "release", spev.button.bnum);
+			spnav_remove_events(SPNAV_EVENT_MOTION);
 		}
-          if (evt.type == DIET_AXISMOTION && evt.flags & DIEF_AXISREL)
-	 {
+          if (evt.type == DIET_AXISMOTION && evt.flags)
+            {
               if (evt.axis == DIAI_X)
                 Rotate (evt.axisrel * 2, 'y');
               else if (evt.axis == DIAI_Y)
                 Rotate (-evt.axisrel * 2, 'x');
             }
-		
-	 
-
           else if (evt.type == DIET_KEYPRESS)
             {
               switch (evt.key_symbol)
@@ -332,9 +328,10 @@ int main (int argc, char *argv[])
                 case DIKS_SPACE:
                   if (PrimitiveType == FLAT_SHADED)
                     PrimitiveType = WIRE_FRAME;
-                  
+                  else
+                    PrimitiveType = WIRE_FRAME;
                   break;
-		
+
                 case DIKS_ESCAPE:
                 case DIKS_POWER:
                   quit = True;
@@ -358,6 +355,7 @@ int main (int argc, char *argv[])
                   ;
                 }
             }
+	
         }
 
       if (rand()%50 == 0)
