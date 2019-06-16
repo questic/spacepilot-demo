@@ -303,7 +303,7 @@ printf("%s\n","hello");
 			Rotate(spev.motion.z, 'z');
 		} else {	
 			//printf("got button %s event b(%d)\n", spev.button.press ? "press" : "release", spev.button.bnum);
-			spnav_remove_events(SPNAV_EVENT_MOTION);
+			//spnav_remove_events(SPNAV_EVENT_MOTION);
 		}
           if (evt.type == DIET_AXISMOTION && evt.flags)
             {
